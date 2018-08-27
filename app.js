@@ -1,18 +1,18 @@
 // controls –––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
-var imageCount = 125;
+var imageCount = 206;
 
 var title = "ART HISTORY"
 
-var pauseKey = 32;
+// var pauseKey = 32;
 
-var initTimeVarMin = 2500;
-var initTimeVarMax = 2500;
+var initTimeVarMin = 25;
+var initTimeVarMax = 25;
 
-var demoModeOn = false;
+var demoModeOn = true;
 
-var demoTimeVarMin = 2500;
-var demoTimeVarMax = 2500;
+var demoTimeVarMin = 4000;
+var demoTimeVarMax = 8000;
 
 var imageWidthVar = 15; // percentage
 var imageWidthMin = 20; // percentage
@@ -22,11 +22,12 @@ var marginLeftVar = 45; // percentage
 
 var transitionTime = 3 // seconds
 
-var holdVibrate = false;
+var holdVibrate = true;
 var holdWidth = 30; // percentage
 var holdMarginTopMin = 1.5 // percentage
 
-var opacityVariation = false;
+var opacityVariation = true;
+var staticOpacityVar = .5;
 
 
 
@@ -48,6 +49,9 @@ document.getElementById("title").innerHTML = title;
 // commands –––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
 init();
+if (demoModeOn === true) {
+	demoMode();
+};
 
 
 // listeners ––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -55,22 +59,9 @@ init();
 
 // not working ??
 
-// window.onkeydown = function(e) {
-// 	var key = e.keyCode ? e.keyCode : e.which;
-// 	if (key == pauseKey) {
-// 		if (key == 16 && initTimeVarMin <= 10000){
-// 			alert("shift pressed!");
-// 			initTimeVarMin += 250;
-// 			initTimeVarMax += 250;
-// 		} else if (key == 16 && initTimeVarMin > 10000);
-// 			initTimeVarMin = 250;
-// 			initTimeVarMax = 250;
-// 	};
-// };
-
 window.onkeydown = function(e) {
 	var key = e.keyCode ? e.keyCode : e.which;
-	if (key == pauseKey) {
+	if (key == 32) {
 		pauseVar = true;
 		document.getElementById('image').style.transition = transitionTime + "s";
 		document.getElementById('image').style.opacity = 1;
@@ -79,11 +70,59 @@ window.onkeydown = function(e) {
 			document.getElementById('image').style.width = (Math.random() * 40) + 20 + "%";
 		} else {
 			document.getElementById('image').style.width = holdWidth + "%";
-		}
+		};
 	};
 };
 
-// these two are almost the same - combine?
+window.onkeyup = function(e) {
+	var key = e.keyCode ? e.keyCode : e.which;
+	if (key == 32) {
+		pauseVar = false;
+		document.getElementById('image').style.transition = "0s";
+		init();
+	} else if (key == 13) {
+       var elem = document.getElementById("body");
+	   req = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen;
+	   req.call(elem);	
+   } else if (key == 40){
+		if(initTimeVarMin <= 2000){
+			initTimeVarMin *= 2;
+			initTimeVarMax *= 2;
+		} else {
+			initTimeVarMin = 2000;
+			initTimeVarMax = 2000;
+		};
+   } else if (key == 38){
+		// alert("pressed");
+		if(initTimeVarMin >= 25){
+			initTimeVarMin /= 2;
+			initTimeVarMax /= 2;
+		} else {
+			initTimeVarMin = 25;
+			initTimeVarMax = 25;
+		};
+   } else if (key == 37){
+		if(staticOpacityVar <= 1){
+			staticOpacityVar += .1;
+		} else {
+			staticOpacityVar = 1;
+		};
+   } else if (key == 39){
+		if(staticOpacityVar >= 0){
+			staticOpacityVar -= .1;
+		} else {
+			staticOpacityVar = 0;
+		};
+   } 
+   // else if (key == 16){
+   // 		alert(demoModeOn);
+   // 		if (demoModeOn = false) {
+   // 			demoModeOn = true;
+   // 		} else {
+   // 			demoModeOn = false;
+   // 		};
+   // }
+};
 
 window.onmousedown = function() {
 	pauseVar = true;
@@ -96,21 +135,6 @@ window.onmousedown = function() {
 		document.getElementById('image').style.width = holdWidth + "%";
 	}
 }
-
-window.onkeyup = function(e) {
-	var key = e.keyCode ? e.keyCode : e.which;
-	if (key == pauseKey) {
-		pauseVar = false;
-		document.getElementById('image').style.transition = "0s";
-		init();
-	} else if (key == 13) {
-       var elem = document.getElementById("body");
-	   req = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen;
-	   req.call(elem);	
-   };
-};
-
-// these two are almost the same - combine?
 
 window.onmouseup = function() {
 	pauseVar = false;
@@ -145,7 +169,7 @@ function init(){
 // demo mode not working - sticking on?
 
 function demoMode(){
-	setInterval(function(){
+	setTimeout(function(){
 		pauseVar = true;
 		document.getElementById('image').style.transition = transitionTime + "s";
 		document.getElementById('image').style.opacity = 1;
@@ -154,8 +178,15 @@ function demoMode(){
 		} else {
 			document.getElementById('image').style.width = holdWidth + "%";
 		}
+		demoMode();
 	}, demoRandomTime());
-}
+	setTimeout(function(){
+		pauseVar = false;
+		document.getElementById('image').style.transition = "0s";
+		document.getElementById('image').style.opacity = staticOpacityVar;
+		init();
+	}, 2000);
+};
 
 function randomImage(){
 	var x = Math.round(Math.random() * imageCount);
@@ -171,7 +202,8 @@ function randomImage(){
 	document.getElementById('image').style.width = width + imageWidthMin + "%";
 	document.getElementById('image').style.marginTop = marginTop + "%";
 	document.getElementById('image').style.marginLeft = marginPlusMinus + marginLeft + "%";
-	if (opacityVariation === true) {
-		document.getElementById('image').style.opacity = (Math.random() * .5) + .25;	
-	};
+	document.getElementById('image').style.opacity = staticOpacityVar;	
+	// if (opacityVariation === true) {
+	// 	document.getElementById('image').style.opacity = (Math.random() * .5) + .25;	
+	// };
 };
